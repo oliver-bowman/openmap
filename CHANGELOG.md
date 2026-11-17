@@ -1,5 +1,13 @@
 # OpenMap changelog
 
+## Unreleased
+
+### Fixed
+
+- **Keep the game's frame rate on the first map opening after an upgrade**: the old 60 fps default
+  is removed before it can change the game's limit, and a cap held across a reload is released
+  immediately. Explicitly chosen map caps are preserved after migration.
+
 ## v0.8.10 (2026-11-16)
 
 ### Fixed

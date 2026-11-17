@@ -821,19 +821,12 @@ end
 
 local function ApplyExtras()
 	if not map or loggingOut then return end
-	ApplyFpsCap()
 	SetUpCoords()
 	SetUpZoneLevels()
 	-- (from the old on / off setting: fading back on was the game's half-fade)
 	if mod.db.noFade ~= nil then
 		if mod.db.noFade == false and (mod.db.moveFade or 0) == 0 then mod.db.moveFade = 0.5 end
 		mod.db.noFade = nil
-	end
-	-- (the frame rate cap 60 from v0.8.9, once for every save: each has the old default, off, written in;
-	-- set to off again after this, it stays off)
-	if not mod.db.fpsCap60 then
-		mod.db.fpsCap60 = true
-		if (mod.db.mapFpsCap or 0) == 0 then mod.db.mapFpsCap = 60 end
 	end
 	-- (and off again from v0.8.10, once for every save: the cap held the whole game at 60 while the map was
 	-- open, below the frame rate players had set the game to, #273. The game's own limit is the default now;
@@ -842,6 +835,8 @@ local function ApplyExtras()
 		mod.db.fpsCapGame = true
 		if mod.db.mapFpsCap == 60 then mod.db.mapFpsCap = 0 end
 	end
+	-- Migrate first: an open map must not hold the old 60 cap after its setting is cleared.
+	ApplyFpsCap()
 	-- the game's own fade off while ours runs (the player's setting kept, and put back at logout)
 	HoldCVar("mapFade", "0")
 	fader:SetShown(map:IsShown() and (mod.db.moveFade or 0) > 0)
