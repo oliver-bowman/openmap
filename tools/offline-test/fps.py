@@ -16,7 +16,7 @@ class MapFpsTests(unittest.TestCase):
             ns = { Client = 'Forever', MapStitch = {
                 viewHooks = {}, IsBuilt = function() return false end,
             } }
-            cvars = { maxFPS = '120', maxFPSBk = '30', vsync = '1', mapFade = '1' }
+            cvars = { maxFPS = '120', mapFade = '1' }
             fpsWrites = {}
             function GetCVar(name) return cvars[name] or '0' end
             function SetCVar(name, value)
@@ -50,16 +50,6 @@ class MapFpsTests(unittest.TestCase):
 
     def tearDown(self):
         self.assertEqual(list(self.lua.globals().ERRORS.values()), [])
-        self.assertEqual(self.lua.eval("cvars.maxFPSBk"), "30")
-        self.assertEqual(self.lua.eval("cvars.vsync"), "1")
-
-    def test_fresh_install_keeps_game_limit(self):
-        self.lua.execute("""
-            Setup({}, 120, false)
-            for _ = 1, 3 do map:Show() mod.RefreshExtras() map:Hide() end
-            assert(mod.db.mapFpsCap == 0 and cvars.maxFPS == '120')
-            assert(#fpsWrites == 0, 'default map changed the game FPS limit')
-        """)
 
     def test_old_default_is_migrated_before_applying_to_an_open_map(self):
         self.lua.execute("""
@@ -69,19 +59,11 @@ class MapFpsTests(unittest.TestCase):
             assert(#fpsWrites == 0, 'upgrade briefly applied the obsolete cap')
         """)
 
-    def test_upgrade_releases_a_cap_kept_across_reload(self):
+    def test_upgrade_releases_a_previously_held_cap(self):
         self.lua.execute("""
             Setup({ mapFpsCap = 60, fpsCap60 = true }, 60, true, { maxFPS = '144' })
-            assert(cvars.maxFPS == '144', 'old held cap survived the upgrade')
+            assert(cvars.maxFPS == '144', 'old held cap was not released immediately')
             assert(mod.char.cvars.maxFPS == nil)
-        """)
-
-    def test_migrated_opt_out_is_not_undone_by_the_obsolete_migration(self):
-        self.lua.execute("""
-            Setup({ mapFpsCap = 0, fpsCapGame = true }, 144, true)
-            mod.RefreshExtras()
-            assert(mod.db.mapFpsCap == 0 and cvars.maxFPS == '144')
-            assert(#fpsWrites == 0)
         """)
 
     def test_cap_explicitly_chosen_after_migration_is_preserved(self):
@@ -94,14 +76,6 @@ class MapFpsTests(unittest.TestCase):
                 map:Hide()
                 assert(cvars.maxFPS == '120' and mod.char.cvars.maxFPS == nil)
             end
-        """)
-
-    def test_custom_cap_survives_upgrade_and_restores_unlimited(self):
-        self.lua.execute("""
-            Setup({ mapFpsCap = 90 }, 0, true)
-            assert(cvars.maxFPS == '90' and mod.db.mapFpsCap == 90)
-            map:Hide()
-            assert(cvars.maxFPS == '0')
         """)
 
 

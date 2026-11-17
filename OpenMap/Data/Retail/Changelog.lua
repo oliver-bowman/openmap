@@ -5,7 +5,7 @@ local _, ns = ...
 
 ns.MapChangelog = {
 	{ version = "Unreleased", date = "", heads = { [1] = "Fixed", }, items = {
-		"|cff6e2c0aKeep the game's frame rate on the first map opening after an upgrade|r: the old 60 fps default is removed before it can change the game's limit, and a cap held across a reload is released immediately. Explicitly chosen map caps are preserved after migration.",
+		"|cff6e2c0aNo brief 60 fps cap when starting with the map already open|r: with v0.8.9's cap still saved, OpenMap could apply it before clearing the old setting, until the next settings refresh. The saved setting is now updated first (#273).",
 	} },
 	{ version = "v0.8.10", date = "2026-11-16", heads = { [1] = "Fixed", [12] = "Improved", }, items = {
 		"|cff6e2c0aThe map loads again for everyone|r: for some players since v0.8.9 the map opened blank, with an error about GetMapInfoAtPosition. A view worked out while the map was still 0 px across (a divide by zero) was put into the map, and every view after it was worked out from it, so the map stayed blank. A view that isn't one is never put up now, the map's last view and its saved window place and size are checked as they're read back, and a bad one is forgotten (#260, #261, #263). The cause, found by OlehPetrykUA: v0.8.9 put the map together during its very first build, before it had a size.",
